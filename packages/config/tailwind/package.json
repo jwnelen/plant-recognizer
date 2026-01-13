@@ -1,0 +1,9 @@
+{
+  "name": "@plant-recognizer/tailwind-config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "tailwind.config.base.js",
+  "devDependencies": {
+    "tailwindcss": "^4.1.18"
+  }
+}

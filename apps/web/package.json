@@ -1,0 +1,37 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:next dev:convex",
+    "dev:next": "next dev",
+    "dev:convex": "convex dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "clean": "rm -rf .next .turbo node_modules"
+  },
+  "dependencies": {
+    "@plant-recognizer/types": "workspace:*",
+    "convex": "^1.31.4",
+    "next": "^16.1.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@plant-recognizer/eslint-config": "workspace:*",
+    "@plant-recognizer/tailwind-config": "workspace:*",
+    "@plant-recognizer/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.0.8",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.1",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3"
+  }
+}
