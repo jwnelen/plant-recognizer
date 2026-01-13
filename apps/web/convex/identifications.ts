@@ -81,3 +81,37 @@ export const updateWithResults = mutation({
     await ctx.db.patch(id, updates);
   },
 });
+
+/**
+ * Mutation to delete an identification and its associated image
+ */
+export const deleteIdentification = mutation({
+  args: {
+    id: v.id("identifications"),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get the identification record
+    const identification = await ctx.db.get(args.id);
+
+    // 2. Return error if not found
+    if (!identification) {
+      return { success: false, error: "Identification not found" };
+    }
+
+    // 3. Store storage ID for cleanup
+    const storageId = identification.uploadedImageId;
+
+    // 4. Delete database record first (critical data)
+    await ctx.db.delete(args.id);
+
+    // 5. Delete storage file (best effort)
+    try {
+      await ctx.storage.delete(storageId);
+    } catch (error) {
+      console.error("Failed to delete storage file:", storageId, error);
+      // Don't fail the operation - DB record is already gone
+    }
+
+    return { success: true };
+  },
+});

@@ -1,10 +1,11 @@
 "use client";
 
-import { use } from "react";
-import { useQuery } from "convex/react";
+import { use, useState } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { ResultCard } from "@/components/results/ResultCard";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function ResultPage({
   params,
@@ -15,6 +16,37 @@ export default function ResultPage({
   const identification = useQuery(api.identifications.get, {
     id: id as Id<"identifications">,
   });
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const deleteIdentification = useMutation(
+    api.identifications.deleteIdentification
+  );
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const result = await deleteIdentification({
+        id: id as Id<"identifications">,
+      });
+
+      if (result.success) {
+        window.location.href = "/history";
+      } else {
+        setDeleteError(result.error || "Failed to delete identification");
+        setIsDeleting(false);
+      }
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error ? error.message : "Failed to delete"
+      );
+      setIsDeleting(false);
+    }
+  };
 
   if (identification === undefined) {
     return (
@@ -50,13 +82,42 @@ export default function ResultPage({
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-green-700">
-          Identification Result
-        </h1>
-        <p className="text-gray-500 mt-1">
-          {date.toLocaleDateString()} at {date.toLocaleTimeString()}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-green-700">
+              Identification Result
+            </h1>
+            <p className="text-gray-500 mt-1">
+              {date.toLocaleDateString()} at {date.toLocaleTimeString()}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowDeleteDialog(true)}
+            className="flex items-center gap-2 px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            Delete
+          </button>
+        </div>
       </header>
+
+      {deleteError && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          {deleteError}
+        </div>
+      )}
 
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-8">
@@ -169,6 +230,18 @@ export default function ResultPage({
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        title="Delete Identification?"
+        message="Are you sure you want to delete this identification? This action cannot be undone, and the uploaded image will be permanently removed."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+        isLoading={isDeleting}
+        variant="danger"
+      />
     </div>
   );
 }
